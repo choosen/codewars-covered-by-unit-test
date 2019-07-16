@@ -1,4 +1,4 @@
-# module Solution
+module Solution
   def primitives(n)
     temp_table = Array.new(n + 1, true)
     (2..n).to_a.each do |number|
@@ -71,4 +71,4 @@
   def format_float(value)
     format('%.2f', value).to_s
   end
-# end
+end
