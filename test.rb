@@ -49,7 +49,11 @@ class Test < Test::Unit::TestCase
   def self.it(description, &block)
     @@it_description = description
     benchmark.report(' ' + it_description + "\n") do
-      block.call
+      begin
+        block.call
+      rescue => e
+        puts "#{RED_COLOR} Error occured: #{e} #{FINISH_COLOR}", e.backtrace[0..1]
+      end
     end
   end
 
