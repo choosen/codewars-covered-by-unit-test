@@ -1,9 +1,9 @@
-require 'benchmark'
+require "test/unit"
 
 # ============================ Test suite to test locally codewars
 # To run type in shell i.e. `ruby prodenum/spec.rb`
 # In that file require_relative ../test.rb and your solution + paste specs
-class Test
+class Test < Test::Unit::TestCase
   GREEN_COLOR = "\e[0;32m".freeze
   RED_COLOR = "\e[0;31m".freeze
   FINISH_COLOR = "\e[0m".freeze
