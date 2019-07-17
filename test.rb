@@ -20,8 +20,25 @@ module Codewars
 
     alias :assert_equals :assert_equal
 
-    def setup
+    def initialize(*args)
+      @time_start = Time.now
       @solution = SolutionKlass.new
+      super
+    end
+
+    TOO_LONG_SUITE_RUN_ERROR_MESSAGE = 'TESTS ARE RUNNING TOO LONG. 12 seconds is max'
+    def setup
+      if Time.now - @time_start > 12 # seconds
+        self.instance_variable_get(:@internal_data).interrupted
+        raise TOO_LONG_SUITE_RUN_ERROR_MESSAGE
+      end
+    end
+
+    def teardown
+      if !self.instance_variable_get(:@internal_data).interrupted? && Time.now - @time_start > 12
+        self.instance_variable_get(:@internal_data).interrupted
+        raise TOO_LONG_SUITE_RUN_ERROR_MESSAGE
+      end
     end
 
     def self.describe(description, &block)
