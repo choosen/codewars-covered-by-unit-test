@@ -17,7 +17,7 @@ So use this repo to make solutions locally
 * Copy & Paste tests from website into second spec block
 * optionally add your own specs, rename solution.rb into NEW_KATA_NAME.rb
 * beat the Kata
-* test it with `./spec.rb`
+* test it with `./new_kata/spec.rb` or `ruby new_kata/spec.rb`
 
 ### Example
 

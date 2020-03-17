@@ -1,3 +1,5 @@
+#!/usr/bin/env ruby
+
 require_relative 'prodenum'
 require_relative '../test'
 
