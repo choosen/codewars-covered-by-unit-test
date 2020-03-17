@@ -24,4 +24,6 @@ changing rake file
 
 example is presented in /prodenum
 
+![Image of Yaktocat](https://i.imgur.com/0iFiVvU.png)
+
 **GL**
