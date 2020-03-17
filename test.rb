@@ -1,59 +1,71 @@
-require 'benchmark'
-
+require "test/unit"
+require 'active_support'
 # ============================ Test suite to test locally codewars
 # To run type in shell i.e. `ruby prodenum/spec.rb`
-# In that file require_relative ../test.rb and your solution + paste specs
-class Test
-  GREEN_COLOR = "\e[0;32m".freeze
-  RED_COLOR = "\e[0;31m".freeze
-  FINISH_COLOR = "\e[0m".freeze
+# In that file require_relative ../test.rb and your solution + paste specs to Codewars module
 
-  def self.diff(first, second)
-    first_s = first.split(' ')
-    second_s = second.split(' ')
-    common_part = second_s & first_s
-    first_s.map do |word|
-      color = common_part.include?(word) ? GREEN_COLOR : RED_COLOR
-      [color, word, FINISH_COLOR].join
-    end.join(' ')
+module Codewars
+  def self.method_missing(method_name, *args)
+    [method_name, *args]
   end
 
-  def self.assert_equals(test, expected)
-    if test == expected
-      puts "#{GREEN_COLOR}  #{expected} #{FINISH_COLOR}"
-    else
-      puts "#{RED_COLOR}  Expected was: #{expected}",
-           "  Resultat was: #{FINISH_COLOR}#{diff(test, expected)}",
-           caller(0, 2)
+  class SolutionKlass
+    include Solution
+  end
+
+  class Test < Test::Unit::TestCase
+    GREEN_COLOR = "\e[0;32m".freeze
+    RED_COLOR = "\e[0;31m".freeze
+    FINISH_COLOR = "\e[0m".freeze
+
+    alias :assert_equals :assert_equal
+
+    def initialize(*args)
+      @time_start = Time.now
+      @solution = SolutionKlass.new
+      super
     end
-  end
 
-  def self.describe(description, &block)
-    Benchmark.bm do |benchmark|
-      @@benchmark = benchmark
+    TOO_LONG_SUITE_RUN_ERROR_MESSAGE = 'TESTS ARE RUNNING TOO LONG. 12 seconds is max'
+    def setup
+      if Time.now - @time_start > 12 # seconds
+        self.instance_variable_get(:@internal_data).interrupted
+        raise TOO_LONG_SUITE_RUN_ERROR_MESSAGE
+      end
+    end
+
+    def teardown
+      if !self.instance_variable_get(:@internal_data).interrupted? && Time.now - @time_start > 12
+        self.instance_variable_get(:@internal_data).interrupted
+        raise TOO_LONG_SUITE_RUN_ERROR_MESSAGE
+      end
+    end
+
+    def self.describe(description, &block)
       @@description = description
       puts 'Testing ' + description
 
       block.call
+
+      @@description = ''
     end
-  end
 
-  def self.benchmark
-    @@benchmark
-  end
-
-  def self.description
-    @@description
-  end
-
-  def self.it(description, &block)
-    @@it_description = description
-    benchmark.report(' ' + it_description + "\n") do
-      block.call
+    def self.it(description, &block)
+      @@it_description = description
+      begin
+        block.call
+      rescue => e
+        puts "#{RED_COLOR} Error occured: #{e} #{FINISH_COLOR}", e.backtrace[0..1]
+      end
+      @@it_description = ''
     end
-  end
 
-  def self.it_description
-    @@it_description
+    def self.assert_equals(test, expected, description = nil)
+      name = Random.urandom(10).chars.map { |c| (c.ord % 25 + 97).chr }.join
+      test_description = [@@description, @@it_description, description, test[1..-1]].compact.join(': ')
+      define_method('test_' + test[0].to_s + '_' + test[1].to_s) { assert_equals(@solution.public_send(test[0], *test[1..-1]), expected, test_description) }
+    rescue => e
+      puts "#{RED_COLOR} Error occured: #{e} #{FINISH_COLOR}", e.backtrace[0..1]
+    end
   end
 end
